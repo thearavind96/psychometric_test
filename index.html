@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Psychometry Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .question {
+      margin-bottom: 15px;
+    }
+    .question p {
+      margin: 0 0 5px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 15px;
+    }
+    input[type="text"], input[type="email"] {
+      padding: 8px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Psychometry Test</h1>
+  <form id="psychometryForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required />
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required />
+
+    <div id="questions"></div>
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const questions = [
+      "I make friends easily.",
+      "I have a vivid imagination.",
+      "I worry about things.",
+      "I love large parties.",
+      "I believe in the importance of art.",
+      "I get angry easily.",
+      "I take charge.",
+      "I experience my emotions intensely.",
+      "I make plans and stick to them.",
+      "I love to help others.",
+      "I keep in the background.",
+      "I am not interested in abstract ideas.",
+      "I seldom feel blue.",
+      "I don't like to draw attention to myself.",
+      "I avoid philosophical discussions.",
+      "I feel comfortable with myself.",
+      "I wait for others to lead the way.",
+      "I seldom get emotional.",
+      "I get chores done right away.",
+      "I am not interested in other people’s problems.",
+      "I am the life of the party.",
+      "I have difficulty understanding abstract ideas.",
+      "I feel others’ emotions.",
+      "I am always prepared.",
+      "I am not really interested in others.",
+      "I don't talk a lot.",
+      "I do not have a good imagination.",
+      "I am relaxed most of the time.",
+      "I talk to a lot of different people at parties.",
+      "I see beauty in things that others might not notice.",
+      "I get upset easily.",
+      "I know how to captivate people.",
+      "I carry out my plans.",
+      "I sympathize with others’ feelings.",
+      "I am quiet around strangers.",
+      "I spend time reflecting on things.",
+      "I seldom get mad.",
+      "I don’t mind being the center of attention.",
+      "I avoid difficult reading material.",
+      "I am easily disturbed.",
+      "I start conversations.",
+      "I am not interested in theoretical discussions.",
+      "I get irritated easily.",
+      "I leave my belongings around."
+    ];
+
+    const reverseScoreItems = new Set([
+      4, 5, 6, 10, 11, 12, 13, 14, 16, 17, 19, 24, 25, 26, 27, 34, 35, 37, 39, 40, 41, 42, 43
+    ]);
+
+    const domains = {
+      Extraversion: [0, 3, 10, 20, 25, 29, 31, 34, 37, 40],
+      Agreeableness: [9, 16, 19, 24, 33],
+      Conscientiousness: [8, 18, 23, 32, 44],
+      Neuroticism: [2, 5, 12, 27, 30, 36, 39, 42],
+      Openness: [1, 4, 11, 14, 21, 26, 30, 35, 38, 41]
+    };
+
+    const questionsContainer = document.getElementById("questions");
+
+    questions.forEach((q, index) => {
+      const div = document.createElement("div");
+      div.classList.add("question");
+      div.innerHTML = `
+        <p>${index + 1}. ${q}</p>
+        <label><input type="radio" name="q${index}" value="1" required /> Strongly Disagree</label><br />
+        <label><input type="radio" name="q${index}" value="2" /> Disagree</label><br />
+        <label><input type="radio" name="q${index}" value="3" /> Neutral</label><br />
+        <label><input type="radio" name="q${index}" value="4" /> Agree</label><br />
+        <label><input type="radio" name="q${index}" value="5" /> Strongly Agree</label>
+      `;
+      questionsContainer.appendChild(div);
+    });
+
+    document.getElementById("psychometryForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      let scores = {};
+
+      for (let domain in domains) {
+        scores[domain] = [];
+      }
+
+      for (let [key, value] of formData.entries()) {
+        if (key.startsWith("q")) {
+          const qIndex = parseInt(key.slice(1));
+          let score = parseInt(value);
+          if (reverseScoreItems.has(qIndex)) {
+            score = 6 - score;
+          }
+          for (let domain in domains) {
+            if (domains[domain].includes(qIndex)) {
+              scores[domain].push(score);
+            }
+          }
+        }
+      }
+
+      let resultHTML = `<h2>Results for ${formData.get("name")} (${formData.get("email")})</h2>`;
+      for (let domain in scores) {
+        if (scores[domain].length > 0) {
+          const average = scores[domain].reduce((a, b) => a + b, 0) / scores[domain].length;
+          resultHTML += `<p><strong>${domain}:</strong> ${average.toFixed(2)}</p>`;
+        }
+      }
+
+      document.getElementById("result").innerHTML = resultHTML;
+    });
+  </script>
+</body>
+</html>
